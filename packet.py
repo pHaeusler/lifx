@@ -2,8 +2,10 @@ import sys
 from collections import namedtuple
 from struct import pack, unpack, calcsize
 
+
 class PacketDirection:
     FROM_BULB, TO_BULB = range(2)
+
 
 class PacketTypeDef(object):
 
@@ -17,13 +19,16 @@ class PacketTypeDef(object):
     def __str__(self):
         return("%s Packet - %d" % (self.text, self.code))
 
+
 class PacketTypeDefFromBulb(PacketTypeDef):
     def __init__(self, text, code, payload, fmt):
         super(PacketTypeDefFromBulb, self).__init__(text, code, payload, fmt, PacketDirection.FROM_BULB)
 
+
 class PacketTypeDefToBulb(PacketTypeDef):
     def __init__(self, text, code, payload, fmt):
         super(PacketTypeDefToBulb, self).__init__(text, code, payload, fmt, PacketDirection.TO_BULB)
+
 
 class PacketType:
 
@@ -95,6 +100,7 @@ class PacketType:
     GET_TEMPERATURE = PacketTypeDefToBulb('Get Temperature', 0x6e, None, None)
     TEMPERATURE = PacketTypeDefToBulb('Temperature', 0x6f, 'temperature', '<h')
 
+
 class PacketCode:
 
     mapper = dict([(getattr(PacketType, attr).code, attr) for attr in dir(PacketType) if not callable(attr) and not attr.startswith("__")])
@@ -106,12 +112,13 @@ class PacketCode:
             return getattr(PacketType, attr)
         return None
 
+
 class Packet:
 
-    header = 'size protocol reserved1 target reserved2 site acknowledge timestamp code reserved3' 
+    header = 'size protocol reserved1 target reserved2 site acknowledge timestamp code reserved3'
     header_fmt = '<HHI6sH6sHQHH'
     header_size = 36
-    protocol = 0x1400 #0x3400 # 0x5400 = bulb protocol
+    protocol = 0x1400  # 0x3400 # 0x5400 = bulb protocol
     protocol_bulb = 0x5400
 
     def __init__(self, packet_type, header_data, payload_data, header_bytes, payload_bytes):
@@ -127,7 +134,7 @@ class Packet:
     @classmethod
     def AsBulb(cls, packet_type, address, site, *payload_data):
         packet = Packet.ToBulb(packet_type, address, site, *payload_data)
-        packet.protocol = packet.protocol_bulb # the bulb uses a different protocol value
+        packet.protocol = packet.protocol_bulb  # the bulb uses a different protocol value
         return packet
 
     @classmethod

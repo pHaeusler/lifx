@@ -2,6 +2,7 @@ from .enums import *
 from .packet import *
 from .connection import Connection
 
+
 class Bulb:
     max_retries = 5
 
@@ -13,7 +14,7 @@ class Bulb:
 
     def __hash__(self):
         return hash((self.ip, self.site, self.mac))
-    
+
     def __eq__(self, other):
         return (self.ip, self.site, self.mac) == (other.ip, other.site, other.mac)
 
@@ -21,13 +22,13 @@ class Bulb:
         self.connection.send(self.mac, self.site, packet_type, ack, *data)
 
     def retry(self, packet_type_send, packet_type_reply, *data):
-        retries=0
+        retries = 0
         while True:
             self.send(packet_type_send, 1, *data)
             packet = self.connection.listen_for_packet(packet_type_reply)
             if packet is not None:
                 return packet
-            retries+=1
+            retries += 1
             if retries > self.max_retries:
                 print "Bulb did not respond"
                 return None
@@ -67,7 +68,7 @@ class Bulb:
                 return payload.label.replace('\x00', '')
         else:
             return None
-    
+
     def set_label(self, label):
         packet = self.retry(PacketType.SET_BULB_LABEL, PacketType.BULB_LABEL, label)
         if packet is not None:
@@ -108,12 +109,13 @@ class Bulb:
             return None
 
     def set_light_state(self, stream, hue, saturation, brightness, kelvin, duration):
-        packet = self.retry(PacketType.SET_LIGHT_COLOUR, PacketType.LIGHT_STATUS, stream, 
-                                                                                  hue,
-                                                                                  saturation,
-                                                                                  brightness,
-                                                                                  kelvin,
-                                                                                  duration)
+        packet = self.retry(PacketType.SET_LIGHT_COLOUR, 
+                            PacketType.LIGHT_STATUS, stream,
+                            hue,
+                            saturation,
+                            brightness,
+                            kelvin,
+                            duration)
         if packet is not None:
             header, payload = packet.get_data()
             if payload is not None:
@@ -150,5 +152,3 @@ class Bulb:
                 return payload
         else:
             return None
-
-

@@ -5,6 +5,3 @@ from .packet import *
 from .network import Network
 from .connection import Connection
 from .bulb import Bulb
-
-
-

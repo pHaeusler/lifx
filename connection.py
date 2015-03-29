@@ -1,13 +1,10 @@
 import socket
 import struct
-from time import time, sleep
 import select
-from threading import Thread
-
-from .packet import *
-
+import time
 import errno
 from socket import error as socket_error
+from .packet import *
 
 class Connection:
     port = 56700
@@ -15,7 +12,7 @@ class Connection:
     bind_ip = ''
     receive_size = 2048
 
-    def __init__(self, connect = True):
+    def __init__(self, connect=True):
         if connect:
             self.connect()
 
@@ -33,15 +30,15 @@ class Connection:
         packet = Packet.ToBulb(packet_type, mac, site, ack, *data).get_bytes()
         self.socket.sendto(packet, (self.broadcast_ip, self.port))
 
-    def receive(self, timeout = 1):
+    def receive(self, timeout=1):
         ready = select.select([self.socket], [], [], timeout)
         if ready[0]:
             data = self.socket.recv(self.receive_size)
             return Packet.FromBulb(data)
         return None
 
-    def listen_for_packet(self, packet_filter, num_packets = 1, timeout = 2):
-        start_time = time()
+    def listen_for_packet(self, packet_filter, num_packets=1, timeout=2):
+        start_time = time.time()
         packets = []
         while True:
             packet = self.receive()
@@ -50,11 +47,8 @@ class Connection:
                     return packet
                 else:
                     packets.append(packet)
-            if timeout is not None and time() > start_time + timeout:
+            if timeout is not None and time.time() > start_time + timeout:
                 break
         if num_packets == 1:
             return None
         return packets
-
-
-
